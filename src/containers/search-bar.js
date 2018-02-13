@@ -1,10 +1,41 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { fetchWeather } from "../actions";
 
-export default class SearchBar extends Component {
+class SearchBar extends Component {
+
+    constructor(props, context) {
+        super(props, context);
+
+        this.state = { term: '' };
+
+        // to make those functions work as callback
+        this.onInputChange = this.onInputChange.bind(this);
+        this.onFormSubmit = this.onFormSubmit.bind(this);
+    }
+
+    onInputChange(event) {
+        this.setState({ term: event.target.value });
+    }
+
+    onFormSubmit(event) {
+        // prevent form submitting default behavior
+        event.preventDefault();
+        // we need to go and fetch weather data
+        this.props.fetchWeather(this.state.term);
+        this.setState({ term: '' });
+    }
+
     render() {
         return (
-            <form className="input-group">
-                <input type="text"/>
+            <form onSubmit={this.onFormSubmit} className="input-group">
+                <input
+                    placeholder="Get a five-day forecast in your favourite city"
+                    className="form-control"
+                    value={this.state.term}
+                    onChange={this.onInputChange}
+                />
                 <span className="input-group-btn">
                     <button type="submit" className="btn btn-secondary">
                         Search
@@ -14,3 +45,11 @@ export default class SearchBar extends Component {
         );
     }
 }
+
+// hookup action creator `fetchWeather` to our component SearchBar via it's props
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({ fetchWeather }, dispatch);
+}
+
+// this returns our container 'SearchBar'
+export default connect(null, mapDispatchToProps)(SearchBar);
